@@ -123,7 +123,7 @@ class TransformerEncoderLayer(BaseModule):
 
 
 @BACKBONES.register_module()
-class VisionTransformer(BaseModule):
+class VisionTransformer2(BaseModule):
     """Vision Transformer.
 
     This backbone is the implementation of `An Image is Worth 16x16 Words:

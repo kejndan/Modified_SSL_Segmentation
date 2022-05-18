@@ -1,11 +1,11 @@
 _base_ = [
-    '../_base_/models/upernet_vit-b16_ln_mln.py',
+    '../_base_/models/upernet_vit-ti_mln.py',
     '../_base_/datasets/ade20k.py', '../_base_/default_runtime.py',
     '../_base_/schedules/schedule_160k.py'
 ]
 
 model = dict(
-    pretrained='pretrain/vit_base_patch16_224.pth',
+    pretrained='pretrain/pretrained_vit_ti.pth',
     decode_head=dict(num_classes=150),
     auxiliary_head=dict(num_classes=150))
 
