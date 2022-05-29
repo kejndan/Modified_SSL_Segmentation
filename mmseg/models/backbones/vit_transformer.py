@@ -5,7 +5,7 @@ from mmseg.utils.vit.layers.transformer_layer import TransformerBlock
 from mmseg.utils.vit.blocks.tokenizer import PathEmbedding
 from functools import partial
 from mmseg.utils.vit.scripts.trunc_normal import trunc_normal_
-from mmseg.utils.vit.blocks.position_encoding import PEG
+from mmseg.utils.vit.blocks.position_encoding import PEG, SinCosPositionEncoding
 from ..builder import BACKBONES
 from torch.nn.modules.utils import _pair as to_2tuple
 # See also: https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision_transformer.py
@@ -51,7 +51,7 @@ class VisionTransformer(nn.Module):
         self.cls_token = nn.Parameter(torch.zeros(1, 1, self.d_model))
         self.avgpool = nn.AdaptiveAvgPool1d(1)
 
-        self.pos_encoding = 'none'
+        self.pos_encoding = 'sincos'
         self.output_encoder = 'CLS'
 
         if self.pos_encoding == 'none':
