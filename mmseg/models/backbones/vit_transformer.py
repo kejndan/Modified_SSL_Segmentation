@@ -60,6 +60,8 @@ class VisionTransformer(nn.Module):
             elif self.output_encoder == 'CLS':
                 self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, self.d_model))
             trunc_normal_(self.pos_embed, std=.02)
+        elif self.pos_encoding == 'sincos':
+            self.pos_block = SinCosPositionEncoding(self.patch_size)
 
         # elif self.pos_encoding == 'PEG':
         #     self.pos_block = PEG(config, self.d_model)
@@ -114,7 +116,7 @@ class VisionTransformer(nn.Module):
         patch_pos_embed = patch_pos_embed.permute(0, 2, 3, 1).view(1, -1, dim)
         return torch.cat((class_pos_embed.unsqueeze(0), patch_pos_embed), dim=1)
 
-    def prepare_token(self, x):
+    def prepare_token(self, x, shifts):
         B, nc, w, h = x.shape
 
         x = self.patch_embed(x)
@@ -126,6 +128,10 @@ class VisionTransformer(nn.Module):
 
         if self.pos_encoding == 'none':
             x = x + self.interpolate_pos_encoding(x, w, h)
+        elif self.config.pos_encoding == 'sincos':
+            reshaped_tokens = x[:,1:].reshape(-1, h // self.patch_embed.patch_size, w // self.patch_embed.patch_size, self.config.d_model)
+            x[:, 1:] += self.pos_block(reshaped_tokens, shifts).reshape(B, -1, self.d_model)
+
 
         return self.pos_drop(x), w, h
 
@@ -147,8 +153,8 @@ class VisionTransformer(nn.Module):
         x = self.head(x)
         return x
 
-    def forward(self, x):
-        x, w, h = self.prepare_token(x)
+    def forward(self, x, shifts=None):
+        x, w, h = self.prepare_token(x, shifts)
 
         outs = []
         patched_w, patched_h = w // self.patch_embed.patch_size, h // self.patch_embed.patch_size
