@@ -50,7 +50,7 @@ class VisionTransformer(nn.Module):
 
         self.cls_token = nn.Parameter(torch.zeros(1, 1, self.d_model))
         self.avgpool = nn.AdaptiveAvgPool1d(1)
-
+        self.patch_size = patch_size
         self.pos_encoding = 'sincos'
         self.output_encoder = 'CLS'
 
@@ -128,8 +128,8 @@ class VisionTransformer(nn.Module):
 
         if self.pos_encoding == 'none':
             x = x + self.interpolate_pos_encoding(x, w, h)
-        elif self.config.pos_encoding == 'sincos':
-            reshaped_tokens = x[:,1:].reshape(-1, h // self.patch_embed.patch_size, w // self.patch_embed.patch_size, self.config.d_model)
+        elif self.pos_encoding == 'sincos':
+            reshaped_tokens = x[:,1:].reshape(-1, h // self.patch_embed.patch_size, w // self.patch_embed.patch_size, self.d_model)
             x[:, 1:] += self.pos_block(reshaped_tokens, shifts).reshape(B, -1, self.d_model)
 
 
